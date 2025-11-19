@@ -1,4 +1,4 @@
-#define PORTA AVIOES "AAAAA"
-#define NAVIO TANQUE "AAAA"
-#define SUBMARINO "AAA"
+#define PORTA_AVIOES "AAAAA"
+#define NAVIO_TANQUE  "AAAA"
+#define SUBMARINO  "AAA"
 #define BOTE "AA"
