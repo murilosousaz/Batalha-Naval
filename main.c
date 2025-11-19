@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 typedef struct {
-    char PORTA_AVIOES[20];
-    char NAVIO_TANQUE[20];
-    char SUBMARINO[20];
-    char BOTE[20];
+    char PORTA_AVIOES[5];
+    char NAVIO_TANQUE[4];
+    char SUBMARINO[3];
+    char BOTE[2];
 } Navios;
 
 void menu(){
