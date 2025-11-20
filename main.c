@@ -1,140 +1,231 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+#define TAM 10
 
 typedef struct {
-    char PORTA_AVIOES[5];
-    char NAVIO_TANQUE[4];
-    char SUBMARINO[3];
-    char BOTE[2];
-} Navios;
+    char nome[50];
+    char tabuleiro[TAM][TAM];
+    int naviosRestantes;
+} Jogador;
 
-void menu(){
+void menu();
+void inicializarTabuleiro(Jogador *j);
+void tabuleiroCompleto(Jogador *j);
+void tabuleiroOculto(Jogador *j);
+void processarTurno(Jogador *atacante, Jogador *defensor);
+void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
+void posicionarTodosNavios(Jogador *j);
+void iniciarJogo();
+void selecionar();
+
+void menu() {
     printf("(1) - Novo Jogo\n");
     printf("(2) - Continuar Jogo\n");
     printf("(3) - Instrucoes\n");
-    printf("(4) - Sair\n");
-    printf("\n");
+    printf("(4) - Sair\n\n");
 }
 
-void tabuleiro(){
-    printf("  A B C D E F G H I J \n");
-    char tab[10][10];
-    int i, j;
-    for(i = 0; i < 10; i++){
-        for(j = 0; j < 10; j++){
-            tab[i][j] = '~';
+void inicializarTabuleiro(Jogador *j) {
+    for (int i = 0; i < TAM; i++) {
+        for (int j2 = 0; j2 < TAM; j2++) {
+            j->tabuleiro[i][j2] = '~';
         }
     }
-    for(i = 0; i < 10; i++){
+}
+
+void tabuleiroCompleto(Jogador *j) {
+    printf("\n  A B C D E F G H I J\n");
+    for (int i = 0; i < TAM; i++) {
         printf("%d ", i + 1);
-        for(j = 0; j < 10; j++){
-            printf("%c ", tab[i][j]);
+        for (int j2 = 0; j2 < TAM; j2++) {
+            printf("%c ", j->tabuleiro[i][j2]);
         }
         printf("\n");
     }
 }
 
-void selecionarNavio(){
-    Navios navios = {"Porta Avioes", "Navio Tanque", "Submarino", "Bote"};
-    int select;
-    printf("Escolha o seu navio:\n");
-    printf("(1) - Porta Avioes\n(2) - Navio Tanque\n(3) - Submarino\n(4) - Bote\n");
-    scanf("%d", &select);
+void tabuleiroOculto(Jogador *j) {
+    printf("\n  A B C D E F G H I J (OPONENTE)\n");
+    for (int i = 0; i < TAM; i++) {
+        printf("%d ", i + 1);
+        for (int j2 = 0; j2 < TAM; j2++) {
+            char celula = j->tabuleiro[i][j2];
 
-    if(select == 1){
-        printf("Voce escolheu %s\n", navios.PORTA_AVIOES);
-    } else if(select == 2){
-        printf("Voce escolheu %s\n", navios.NAVIO_TANQUE);
-    } else if(select == 3){
-        printf("Voce escolheu %s\n", navios.SUBMARINO);
-    } else if(select == 4){
-        printf("Voce escolheu %s\n", navios.BOTE);
+            if (celula == 'O') {
+                printf("~ ");
+            } else {
+                printf("%c ", celula);
+            }
+        }
+        printf("\n");
+    }
+}
+
+void processarTurno(Jogador *atacante, Jogador *defensor) {
+    char letra;
+    int linha;
+    int i, j;
+
+    printf("\nVEZ DE: %s\n", atacante->nome);
+
+    printf("\nSeu tabuleiro:\n");
+    tabuleiroCompleto(atacante);
+
+    printf("\nTabuleiro do oponente:\n");
+    tabuleiroOculto(defensor);
+
+    while (1) {
+        printf("\nDigite a coordenada do tiro (ex: A 5): ");
+        scanf(" %c %d", &letra, &linha);
+
+        letra = toupper(letra);
+        j = letra - 'A';
+        i = linha - 1;
+
+        if (i < 0 || i >= TAM || j < 0 || j >= TAM) {
+            printf(">> Coordenada fora do mapa! Tente novamente.\n");
+            continue;
+        }
+
+        if (defensor->tabuleiro[i][j] == 'X' || defensor->tabuleiro[i][j] == '.') {
+            printf(">> Voce ja atirou aqui!\n");
+            continue;
+        }
+
+        break;
+    }
+
+    if (defensor->tabuleiro[i][j] == 'O') {
+        printf("\n*** ACERTOU! ***\n");
+        defensor->tabuleiro[i][j] = 'X';
+        defensor->naviosRestantes--;
     } else {
-        printf("Opcao invalida.\n");
+        printf("\nTiro na agua...\n");
+        defensor->tabuleiro[i][j] = '.';
     }
 }
 
-void iniciarJogo(){
-    tabuleiro();
-    selecionarNavio();
+void iniciarJogo() {
+    Jogador p1, p2;
+
+    printf("Nome do Jogador 1: ");
+    scanf(" %49s", p1.nome);
+
+    printf("Nome do Jogador 2: ");
+    scanf(" %49s", p2.nome);
+
+    inicializarTabuleiro(&p1);
+    inicializarTabuleiro(&p2);
+
+    posicionarTodosNavios(&p1);
+    posicionarTodosNavios(&p2);
+
+    p1.naviosRestantes = 14;
+    p2.naviosRestantes = 14;
+
+    printf("\nTabuleiro final do jogador 1 (completo):\n");
+    tabuleiroCompleto(&p1);
+
+    processarTurno(&p1, &p2);
 }
 
-void continuarJogo(){
+void posicionarTodosNavios(Jogador *j) {
+    printf("\n--- POSICIONAMENTO DE NAVIOS (%s) ---\n", j->nome);
 
+    posicionarNavio(j, 5, "Porta-Avioes");
+    posicionarNavio(j, 4, "Navio-Tanque");
+    posicionarNavio(j, 3, "Submarino");
+    posicionarNavio(j, 2, "Bote");
 }
 
-void fazerJogada(){
+void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio) {
+    char letra, direcao;
+    int i, j;
 
-}
+    bool ok = false;
 
-void exibirInstrucoes(){
-    printf("--------------------------------------------------\n");
-    printf("BEM-VINDO(A) A BATALHA NAVAL\n");
-    printf("--------------------------------------------------\n\n");
+    while (!ok) {
+        printf("\nPosicionar %s (%d células)\n", nomeNavio, tamanho);
+        printf("Digite a coordenada inicial (Ex: A 5): ");
+        scanf(" %c %d", &letra, &i);
 
-    printf("Objetivo do Jogo\n");
-    printf("Seu objetivo e afundar todos os navios do seu oponente.\n\n");
+        letra = toupper(letra);
 
-    printf("O Tabuleiro\n");
-    printf("Coordenadas podem ser digitadas como XY ou letra e numero.\n");
-    printf("Ha um tabuleiro para seus navios e outro para registrar tiros.\n\n");
+        j = letra - 'A';
+        i = i - 1;
 
-    printf("Simbolos\n");
-    printf("~ : Agua\n");
-    printf("O : Navio (somente no seu tabuleiro)\n");
-    printf("X : Acerto\n");
-    printf("- : Erro\n\n");
+        printf("Direção (H = horizontal, V = vertical): ");
+        scanf(" %c", &direcao);
+        direcao = toupper(direcao);
 
-    printf("Como Jogar\n");
-    printf("1. Posicione seus navios.\n");
-    printf("2. Escolha coordenadas para atacar.\n");
-    printf("3. X = acerto, - = erro.\n\n");
-
-    printf("Vencedor\n");
-    printf("Ganha quem afundar todos os navios inimigos.\n\n");
-
-    printf("--------------------------------------------------\n");
-    printf("BOA SORTE, MARUJO\n");
-    printf("--------------------------------------------------\n");
-}
-
-void sair(){
-    printf("Encerrando o jogo...\n");
-    printf("Obrigado por jogar Batalha Naval!\n");
-    exit(0);
-}
-
-void selecionar(){
-    int selecao;
-    scanf("%d", &selecao);
-
-     switch(selecao){
-        case 1:{ 
-            iniciarJogo(); 
-            break;
+        if (i < 0 || i >= TAM || j < 0 || j >= TAM) {
+            printf("Coordenada inválida!\n");
+            continue;
         }
-        case 2:{
-            continuarJogo(); 
-            break;
+
+        if (direcao == 'H' && j + tamanho > TAM) {
+            printf("Não cabe horizontalmente!\n");
+            continue;
         }
-        case 3:{ 
-            exibirInstrucoes(); 
-            break;
+
+        if (direcao == 'V' && i + tamanho > TAM) {
+            printf("Não cabe verticalmente!\n");
+            continue;
         }
-        case 4:{
-            sair(); 
-            break;
+
+        bool proibido = false;
+
+        for (int k = 0; k < tamanho; k++) {
+            int ii = i + (direcao == 'V' ? k : 0);
+            int jj = j + (direcao == 'H' ? k : 0);
+
+            for (int a = ii - 1; a <= ii + 1; a++) {
+                for (int b = jj - 1; b <= jj + 1; b++) {
+
+                    if (a < 0 || a >= TAM || b < 0 || b >= TAM)
+                        continue;
+
+                    if (player->tabuleiro[a][b] == 'O') {
+                        proibido = true;
+                    }
+                }
+            }
         }
-        default:{
-            printf("Opcao invalida.\n");
+
+        if (proibido) {
+            printf("Navio muito proximo de outro! Nao eh permitido encostar.\n");
+            continue;
         }
+
+        for (int k = 0; k < tamanho; k++) {
+            int ii = i + (direcao == 'V' ? k : 0);
+            int jj = j + (direcao == 'H' ? k : 0);
+            player->tabuleiro[ii][jj] = 'O';
+        }
+
+        printf("%s posicionado com sucesso!\n", nomeNavio);
+        ok = true;
     }
 }
 
-int main(){
-    while(1){
-        menu();
-        selecionar();
+void selecionar() {
+    int op;
+    scanf("%d", &op);
+
+    switch (op) {
+        case 1: iniciarJogo(); break;
+        case 2: printf("Continuar jogo ainda não implementado.\n"); break;
+        case 3: printf("Instruções ainda não implementadas.\n"); break;
+        case 4: exit(0);
+        default: printf("Opção inválida!\n");
     }
+}
+
+int main() {
+    menu();
+    selecionar();
     return 0;
 }
