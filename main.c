@@ -13,9 +13,11 @@ void menu(){
     printf("(2) - Continuar Jogo\n");
     printf("(3) - Instrucoes\n");
     printf("(4) - Sair\n");
+    printf("\n");
 }
 
 void tabuleiro(){
+    printf("  A B C D E F G H I J \n");
     char tab[10][10];
     int i, j;
     for(i = 0; i < 10; i++){
@@ -35,9 +37,6 @@ void tabuleiro(){
 void selecionarNavio(){
     Navios navios = {"Porta Avioes", "Navio Tanque", "Submarino", "Bote"};
     int select;
-
-    tabuleiro();
-
     printf("Escolha o seu navio:\n");
     printf("(1) - Porta Avioes\n(2) - Navio Tanque\n(3) - Submarino\n(4) - Bote\n");
     scanf("%d", &select);
