@@ -108,21 +108,33 @@ void selecionar(){
     int selecao;
     scanf("%d", &selecao);
 
-    if(selecao == 1){
-        iniciarJogo();
-    } else if(selecao == 2){
-        continuarJogo();
-    } else if(selecao == 3){
-        exibirInstrucoes();
-    } else if(selecao == 4){
-        sair();
-    } else {
-        printf("Opcao invalida.\n");
+     switch(selecao){
+        case 1:{ 
+            iniciarJogo(); 
+            break;
+        }
+        case 2:{
+            continuarJogo(); 
+            break;
+        }
+        case 3:{ 
+            exibirInstrucoes(); 
+            break;
+        }
+        case 4:{
+            sair(); 
+            break;
+        }
+        default:{
+            printf("Opcao invalida.\n");
+        }
     }
 }
 
 int main(){
-    menu();
-    selecionar();
+    while(1){
+        menu();
+        selecionar();
+    }
     return 0;
 }
