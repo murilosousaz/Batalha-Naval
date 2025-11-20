@@ -38,8 +38,6 @@ void pausar() {
 void limparTela() {
 #ifdef _WIN32
     system("cls");
-#else
-    system("clear");
 #endif
 }
 
@@ -123,7 +121,6 @@ void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio) {
         }
         direcao = toupper(direcao);
 
-        /* Validação */
         if (row < 0 || row >= TAM || col < 0 || col >= TAM) {
             printf("Coordenada invalida!\n");
             pausar();
@@ -248,12 +245,29 @@ void selecionar() {
     scanf("%d", &op);
 
     switch (op) {
-        case 1: iniciarJogo(); break;
-        case 2: printf("Continuar jogo nao implementado.\n"); break;
-        case 3: printf("Instrucoes nao implementadas.\n"); break;
-        case 4: exit(0);
-        default: printf("Opcao invalida!\n");
+        case 1: {
+            iniciarJogo(); 
+            break;
+        }
+        case 2: {
+            printf("Continuar jogo nao implementado.\n"); 
+            break;
+        }
+        case 3: {
+            Instrucoes(); 
+            break;
+        }
+        case 4: {
+            exit(0);
+        }
+        default: {
+            printf("Opcao invalida!\n");
+        }
     }
+}
+
+void Instrucoes(){
+
 }
 
 int main() {
