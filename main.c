@@ -24,7 +24,6 @@ void tabuleiroOculto(Jogador *j);
 void posicionarTodosNavios(Jogador *j);
 void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio);
 void processarTurno(Jogador *atacante, Jogador *defensor);
-void condicaoVitoria();
 
 void limparBuffer()
 {
@@ -200,8 +199,7 @@ void processarTurno(Jogador *atacante, Jogador *defensor)
 
         printf("\nSeu tabuleiro:\n");
         tabuleiroCompleto(atacante);
-
-        printf("\nTabuleiro do oponente:\n");
+        limparTela();
         tabuleiroOculto(defensor);
 
         char letra;
