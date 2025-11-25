@@ -5,8 +5,7 @@
 
 #define TAM 10
 
-typedef struct
-{
+typedef struct{
     char nome[50];
     char tabuleiro[TAM][TAM];
     int naviosRestantes;
@@ -15,6 +14,8 @@ typedef struct
 void menu();
 void selecionar();
 void iniciarJogo();
+void instrucoes();
+void salvarJogo();
 void limparTela();
 void limparBuffer();
 void pausar();
@@ -25,44 +26,40 @@ void posicionarTodosNavios(Jogador *j);
 void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio);
 void processarTurno(Jogador *atacante, Jogador *defensor);
 
-void limparBuffer()
-{
+void limparBuffer(){
     int c;
     while ((c = getchar()) != '\n' && c != EOF){
     }
 }
 
-void pausar()
-{
+void pausar(){
     printf("Pressione Enter para continuar...");
     limparBuffer();
     getchar();
 }
 
-void limparTela()
-{
+void limparTela(){
 #ifdef _WIN32
     system("cls");
+#else
+    system("clear");
 #endif
 }
 
-void menu()
-{
+void menu(){
     printf("(1) - Novo Jogo\n");
     printf("(2) - Continuar Jogo\n");
     printf("(3) - Instrucoes\n");
     printf("(4) - Sair\n\n");
 }
 
-void inicializarTabuleiro(Jogador *j)
-{
+void inicializarTabuleiro(Jogador *j){
     for (int i = 0; i < TAM; i++)
         for (int k = 0; k < TAM; k++)
             j->tabuleiro[i][k] = '~';
 }
 
-void tabuleiroCompleto(Jogador *j)
-{
+void tabuleiroCompleto(Jogador *j){
     printf("\n   A B C D E F G H I J\n");
     for (int i = 0; i < TAM; i++)
     {
@@ -73,9 +70,8 @@ void tabuleiroCompleto(Jogador *j)
     }
 }
 
-void tabuleiroOculto(Jogador *j)
-{
-    printf("\n  A B C D E F G H I J (OPONENTE)\n");
+void tabuleiroOculto(Jogador *j){
+    printf("\n  A B C D E F G H I J \n");
     for (int i = 0; i < TAM; i++)
     {
         printf("%2d ", i + 1);
@@ -88,8 +84,7 @@ void tabuleiroOculto(Jogador *j)
     }
 }
 
-bool areaOcupada(Jogador *player, int i, int j, int tamanho, char dir)
-{
+bool areaOcupada(Jogador *player, int i, int j, int tamanho, char dir){
     for (int k = 0; k < tamanho; k++)
     {
         int ii = i + (dir == 'V' ? k : 0);
@@ -110,8 +105,7 @@ bool areaOcupada(Jogador *player, int i, int j, int tamanho, char dir)
     return false;
 }
 
-void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio)
-{
+void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio){
     while (1)
     {
         limparTela();
@@ -179,8 +173,7 @@ void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio)
     }
 }
 
-void posicionarTodosNavios(Jogador *j)
-{
+void posicionarTodosNavios(Jogador *j){
     printf("\n--- POSICIONAMENTO DE NAVIOS PARA: %s ---\n", j->nome);
 
     posicionarNavio(j, 5, "Porta-Avioes");
@@ -189,8 +182,7 @@ void posicionarTodosNavios(Jogador *j)
     posicionarNavio(j, 2, "Bote");
 }
 
-void processarTurno(Jogador *atacante, Jogador *defensor)
-{
+void processarTurno(Jogador *atacante, Jogador *defensor){
     while (1)
     {
         limparTela();
@@ -246,16 +238,15 @@ void processarTurno(Jogador *atacante, Jogador *defensor)
     }
 }
 
-void iniciarJogo()
-{
+void iniciarJogo(){
     limparTela();
     Jogador p1, p2;
 
     printf("Nome do Jogador 1: ");
-    scanf(" %49s", p1.nome);
+    scanf(" %s", p1.nome);
 
     printf("Nome do Jogador 2: ");
-    scanf(" %49s", p2.nome);
+    scanf(" %s", p2.nome);
 
     inicializarTabuleiro(&p1);
     inicializarTabuleiro(&p2);
@@ -267,12 +258,10 @@ void iniciarJogo()
     p2.naviosRestantes = 14;
 
     printf("\nPosicionamento concluido! Iniciando jogo...\n");
-    pausar();
 
     int turno = 1;
 
-    while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) // COLOQUEI SÓ ESSA CONDIÇÃO AQUI   -LUCAS
-    {
+    while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0){
 
         if (turno % 2 != 0)
         {
@@ -303,8 +292,11 @@ void iniciarJogo()
     pausar();
 }
 
-void selecionar()
-{
+void salvarJogo(){
+    
+}
+
+void selecionar(){
     int op;
     printf("Selecione uma opcao: ");
     scanf("%d", &op);
@@ -323,7 +315,7 @@ void selecionar()
     }
     case 3:
     {
-        Instrucoes();
+        instrucoes();
         break;
     }
     case 4:
@@ -337,12 +329,24 @@ void selecionar()
     }
 }
 
-void Instrucoes()
-{
+void instrucoes() {
+    limparTela();
+
+    printf("======= INSTRUCOES =======\n\n");
+    printf("1 - O jogo consiste em derrubar os navios do adversario.\n");
+    printf("2 - Cada jogador posiciona seus navios no tabuleiro.\n");
+    printf("3 - Os ataques sao feitos usando coordenadas (ex: A5, D7).\n");
+    printf("4 - Vence quem destruir todos os navios do oponente.\n\n");
+    printf("==========================\n");
+    printf("Pressione ENTER para voltar ao menu...\n");
+
+    limparBuffer();
+    getchar();
+
+    menu();
 }
 
-int main()
-{
+int main(){
     menu();
     selecionar();
     return 0;
