@@ -5,7 +5,7 @@
 
 #define TAM 10
 
-typedef struct{
+typedef struct {
     char nome[50];
     char tabuleiro[TAM][TAM];
     int naviosRestantes;
@@ -15,7 +15,6 @@ void menu();
 void selecionar();
 void iniciarJogo();
 void instrucoes();
-void salvarJogo();
 void limparTela();
 void limparBuffer();
 void pausar();
@@ -23,22 +22,22 @@ void inicializarTabuleiro(Jogador *j);
 void tabuleiroCompleto(Jogador *j);
 void tabuleiroOculto(Jogador *j);
 void posicionarTodosNavios(Jogador *j);
-void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio);
+void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
+bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir);
 void processarTurno(Jogador *atacante, Jogador *defensor);
 
-void limparBuffer(){
+void limparBuffer() {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF){
-    }
+    while ((c = getchar()) != '\n' && c != EOF);
 }
 
-void pausar(){
+void pausar() {
     printf("Pressione Enter para continuar...");
     limparBuffer();
     getchar();
 }
 
-void limparTela(){
+void limparTela() {
 #ifdef _WIN32
     system("cls");
 #else
@@ -46,54 +45,53 @@ void limparTela(){
 #endif
 }
 
-void menu(){
+void menu() {
+    printf("\n BEM-VINDO A BATALHA NAVAL \n");
     printf("(1) - Novo Jogo\n");
     printf("(2) - Continuar Jogo\n");
     printf("(3) - Instrucoes\n");
     printf("(4) - Sair\n\n");
 }
 
-void inicializarTabuleiro(Jogador *j){
+void inicializarTabuleiro(Jogador *j) {
     for (int i = 0; i < TAM; i++)
         for (int k = 0; k < TAM; k++)
             j->tabuleiro[i][k] = '~';
 }
 
-void tabuleiroCompleto(Jogador *j){
+void imprimirCabecalho() {
     printf("\n   A B C D E F G H I J\n");
-    for (int i = 0; i < TAM; i++)
-    {
+}
+
+void tabuleiroCompleto(Jogador *j) {
+    imprimirCabecalho();
+    for (int i = 0; i < TAM; i++) {
         printf("%2d ", i + 1);
-        for (int j2 = 0; j2 < TAM; j2++)
-            printf("%c ", j->tabuleiro[i][j2]);
+        for (int c = 0; c < TAM; c++)
+            printf("%c ", j->tabuleiro[i][c]);
         printf("\n");
     }
 }
 
-void tabuleiroOculto(Jogador *j){
-    printf("\n  A B C D E F G H I J \n");
-    for (int i = 0; i < TAM; i++)
-    {
+void tabuleiroOculto(Jogador *j) {
+    imprimirCabecalho();
+    for (int i = 0; i < TAM; i++) {
         printf("%2d ", i + 1);
-        for (int j2 = 0; j2 < TAM; j2++)
-        {
-            char celula = j->tabuleiro[i][j2];
-            printf("%c ", celula == 'O' ? '~' : celula);
+        for (int c = 0; c < TAM; c++) {
+            char cel = j->tabuleiro[i][c];
+            printf("%c ", cel == 'O' ? '~' : cel);
         }
         printf("\n");
     }
 }
 
-bool areaOcupada(Jogador *player, int i, int j, int tamanho, char dir){
-    for (int k = 0; k < tamanho; k++)
-    {
-        int ii = i + (dir == 'V' ? k : 0);
-        int jj = j + (dir == 'H' ? k : 0);
+bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir) {
+    for (int k = 0; k < tamanho; k++) {
+        int r = linha + (dir == 'V' ? k : 0);
+        int c = coluna + (dir == 'H' ? k : 0);
 
-        for (int a = ii - 1; a <= ii + 1; a++)
-        {
-            for (int b = jj - 1; b <= jj + 1; b++)
-            {
+        for (int a = r - 1; a <= r + 1; a++) {
+            for (int b = c - 1; b <= c + 1; b++) {
                 if (a < 0 || a >= TAM || b < 0 || b >= TAM)
                     continue;
 
@@ -105,20 +103,17 @@ bool areaOcupada(Jogador *player, int i, int j, int tamanho, char dir){
     return false;
 }
 
-void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio){
-    while (1)
-    {
+void posicionarNavio(Jogador *j, int tamanho, const char *nome) {
+    while (1) {
         limparTela();
+        printf("\nPosicionar %s (%d celulas)\n", nome, tamanho);
+        tabuleiroCompleto(j);
 
-        printf("\nPosicionar %s (%d celulas)\n\n", nomeNavio, tamanho);
-        tabuleiroCompleto(player);
-
-        char letra, direcao;
+        char letra, dir;
         int linha;
 
         printf("\nDigite a coordenada inicial (Ex: A 5): ");
-        if (scanf(" %c %d", &letra, &linha) != 2)
-        {
+        if (scanf(" %c %d", &letra, &linha) != 2) {
             limparBuffer();
             continue;
         }
@@ -127,110 +122,97 @@ void posicionarNavio(Jogador *player, int tamanho, const char *nomeNavio){
         int col = letra - 'A';
         int row = linha - 1;
 
-        printf("Direcao (H = horizontal, V = vertical): ");
-        if (scanf(" %c", &direcao) != 1)
-        {
+        printf("Direcao (H/V): ");
+        if (scanf(" %c", &dir) != 1) {
             limparBuffer();
             continue;
         }
-        direcao = toupper(direcao);
 
-        if (row < 0 || row >= TAM || col < 0 || col >= TAM)
-        {
+        dir = toupper(dir);
+
+        if (row < 0 || row >= TAM || col < 0 || col >= TAM) {
             printf("Coordenada invalida!\n");
             pausar();
             continue;
         }
-        if (direcao == 'H' && col + tamanho > TAM)
-        {
+        if (dir == 'H' && col + tamanho > TAM) {
             printf("Nao cabe horizontalmente!\n");
             pausar();
             continue;
         }
-        if (direcao == 'V' && row + tamanho > TAM)
-        {
+        if (dir == 'V' && row + tamanho > TAM) {
             printf("Nao cabe verticalmente!\n");
             pausar();
             continue;
         }
-        if (areaOcupada(player, row, col, tamanho, direcao))
-        {
-            printf("Navio nao pode encostar em outro!\n");
+        if (areaOcupada(j, row, col, tamanho, dir)) {
+            printf("Navio encostaria em outro!\n");
             pausar();
             continue;
         }
 
-        for (int k = 0; k < tamanho; k++)
-        {
-            int ii = row + (direcao == 'V' ? k : 0);
-            int jj = col + (direcao == 'H' ? k : 0);
-            player->tabuleiro[ii][jj] = 'O';
+        for (int k = 0; k < tamanho; k++) {
+            int r = row + (dir == 'V' ? k : 0);
+            int c = col + (dir == 'H' ? k : 0);
+            j->tabuleiro[r][c] = 'O';
         }
 
-        printf("%s posicionado com sucesso!\n", nomeNavio);
+        printf("%s posicionado!\n", nome);
         pausar();
         break;
     }
 }
 
-void posicionarTodosNavios(Jogador *j){
-    printf("\n--- POSICIONAMENTO DE NAVIOS PARA: %s ---\n", j->nome);
-
+void posicionarTodosNavios(Jogador *j) {
+    printf("\n--- POSICIONAMENTO DE %s ---\n", j->nome);
     posicionarNavio(j, 5, "Porta-Avioes");
     posicionarNavio(j, 4, "Navio-Tanque");
     posicionarNavio(j, 3, "Submarino");
     posicionarNavio(j, 2, "Bote");
 }
 
-void processarTurno(Jogador *atacante, Jogador *defensor){
-    while (1)
-    {
+void processarTurno(Jogador *atacante, Jogador *defensor) {
+    while (1) {
         limparTela();
-
         printf("\nVEZ DE: %s\n", atacante->nome);
 
-        printf("\nSeu tabuleiro:\n");
-        tabuleiroCompleto(atacante);
-        limparTela();
+        printf("\nTabuleiro inimigo:\n");
         tabuleiroOculto(defensor);
 
         char letra;
         int linha;
 
-        printf("\nDigite a coordenada do tiro (ex: A 5): ");
-        if (scanf(" %c %d", &letra, &linha) != 2)
-        {
+        printf("\nCoordenada do tiro (ex: A 5): ");
+        if (scanf(" %c %d", &letra, &linha) != 2) {
             limparBuffer();
             continue;
         }
 
         letra = toupper(letra);
-        int j = letra - 'A';
-        int i = linha - 1;
+        int col = letra - 'A';
+        int row = linha - 1;
 
-        if (i < 0 || i >= TAM || j < 0 || j >= TAM)
-        {
-            printf(">> Coordenada fora do mapa!\n");
-            pausar();
-            continue;
-        }
-        if (defensor->tabuleiro[i][j] == 'X' || defensor->tabuleiro[i][j] == '.')
-        {
-            printf(">> Voce ja atirou aqui!\n");
+        if (row < 0 || row >= TAM || col < 0 || col >= TAM) {
+            printf("Fora do mapa!\n");
             pausar();
             continue;
         }
 
-        if (defensor->tabuleiro[i][j] == 'O')
-        {
+        char *cel = &defensor->tabuleiro[row][col];
+
+        if (*cel == 'X' || *cel == '.') {
+            printf("Voce ja atirou aqui!\n");
+            pausar();
+            continue;
+        }
+
+        if (*cel == 'O') {
             printf("\n*** ACERTOU! ***\n");
-            defensor->tabuleiro[i][j] = 'X';
+            *cel = 'X';
             defensor->naviosRestantes--;
-        }
-        else
-        {
+        } else {
             printf("\nTiro na agua...\n");
-            defensor->tabuleiro[i][j] = '.';
+            *cel = '.';
         }
 
         pausar();
@@ -238,7 +220,7 @@ void processarTurno(Jogador *atacante, Jogador *defensor){
     }
 }
 
-void iniciarJogo(){
+void iniciarJogo() {
     limparTela();
     Jogador p1, p2;
 
@@ -257,88 +239,36 @@ void iniciarJogo(){
     p1.naviosRestantes = 14;
     p2.naviosRestantes = 14;
 
-    printf("\nPosicionamento concluido! Iniciando jogo...\n");
-
     int turno = 1;
-
-    while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0){
-
-        if (turno % 2 != 0)
-        {
+    while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
+        if (turno % 2)
             processarTurno(&p1, &p2);
-        }
         else
-        {
             processarTurno(&p2, &p1);
-        }
 
         turno++;
     }
 
     limparTela();
-    printf("\n=================================\n");
-    printf("       FIM DE JOGO! \n");
-    printf("=================================\n");
+    printf("\n===== FIM DE JOGO =====\n");
 
     if (p1.naviosRestantes > 0)
-    {
-        printf("PARABENS! %s VENCEU A BATALHA NAVAL!\n", p1.nome);
-    }
+        printf("VENCEDOR: %s\n", p1.nome);
     else
-    {
-        printf("PARABENS! %s VENCEU A BATALHA NAVAL!\n", p2.nome);
-    }
+        printf("VENCEDOR: %s\n", p2.nome);
 
     pausar();
 }
 
-void salvarJogo(){
-    
-}
-
-void selecionar(){
-    int op;
-    printf("Selecione uma opcao: ");
-    scanf("%d", &op);
-
-    switch (op)
-    {
-    case 1:
-    {
-        iniciarJogo();
-        break;
-    }
-    case 2:
-    {
-        printf("Continuar jogo nao implementado.\n");
-        break;
-    }
-    case 3:
-    {
-        instrucoes();
-        break;
-    }
-    case 4:
-    {
-        exit(0);
-    }
-    default:
-    {
-        printf("Opcao invalida!\n");
-    }
-    }
-}
-
 void instrucoes() {
     limparTela();
-
-    printf("======= INSTRUCOES =======\n\n");
-    printf("1 - O jogo consiste em derrubar os navios do adversario.\n");
-    printf("2 - Cada jogador posiciona seus navios no tabuleiro.\n");
-    printf("3 - Os ataques sao feitos usando coordenadas (ex: A5, D7).\n");
-    printf("4 - Vence quem destruir todos os navios do oponente.\n\n");
+    printf("======= INSTRUCOES =======\n");
+    printf("1 - Derrube os navios do adversario.\n");
+    printf("2 - Cada jogador posiciona seus navios.\n");
+    printf("3 - Ataques usando coordenadas (A5, D7...).\n");
+    printf("4 - Vence quem destruir todos os navios.\n");
     printf("==========================\n");
-    printf("Pressione ENTER para voltar ao menu...\n");
+    printf("Pressione ENTER...\n");
 
     limparBuffer();
     getchar();
@@ -346,7 +276,21 @@ void instrucoes() {
     menu();
 }
 
-int main(){
+void selecionar() {
+    int op;
+    printf("Selecione uma opcao: ");
+    scanf("%d", &op);
+
+    switch (op) {
+        case 1: iniciarJogo(); break;
+        case 2: printf("Continuar jogo nao implementado.\n"); break;
+        case 3: instrucoes(); break;
+        case 4: exit(0);
+        default: printf("Opcao invalida!\n");
+    }
+}
+
+int main() {
     menu();
     selecionar();
     return 0;
