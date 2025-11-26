@@ -4,18 +4,15 @@
 #include <ctype.h>
 
 #define TAM 10
-
 typedef struct {
     char nome[50];
     char tabuleiro[TAM][TAM];
     int naviosRestantes;
 } Jogador;
-
-typedef struct{
-    Jogador p1;
-    Jogador p2;
+typedef struct {
+    Jogador p1, p2;
     int turno;
-}SaveGame;
+} SaveGame;
 
 void menu();
 void selecionar();
@@ -24,15 +21,20 @@ void instrucoes();
 void limparTela();
 void limparBuffer();
 void pausar();
+
 void inicializarTabuleiro(Jogador *j);
+void imprimirCabecalho();
 void tabuleiroCompleto(Jogador *j);
 void tabuleiroOculto(Jogador *j);
+
+bool areaOcupada(Jogador *player, int l, int c, int tam, char dir);
+void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
 void posicionarTodosNavios(Jogador *j);
+
+void processarTurno(Jogador *atacante, Jogador *defensor);
+
 void salvarJogo(Jogador *p1, Jogador *p2, int turno);
 bool carregarJogo(Jogador *p1, Jogador *p2, int *turno);
-void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
-bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir);
-void processarTurno(Jogador *atacante, Jogador *defensor);
 
 void limparBuffer() {
     int c;
@@ -40,7 +42,7 @@ void limparBuffer() {
 }
 
 void pausar() {
-    printf("Pressione Enter para continuar...");
+    printf("Pressione ENTER para continuar...");
     limparBuffer();
     getchar();
 }
@@ -54,11 +56,11 @@ void limparTela() {
 }
 
 void menu() {
-    printf("\n BEM-VINDO A BATALHA NAVAL \n");
-    printf("(1) - Novo Jogo\n");
-    printf("(2) - Continuar Jogo\n");
-    printf("(3) - Instrucoes\n");
-    printf("(4) - Sair\n\n");
+    printf("\n===== BATALHA NAVAL =====\n");
+    printf("1 - Novo Jogo\n");
+    printf("2 - Continuar Jogo\n");
+    printf("3 - Instrucoes\n");
+    printf("4 - Sair\n\n");
 }
 
 void inicializarTabuleiro(Jogador *j) {
@@ -87,7 +89,7 @@ void tabuleiroOculto(Jogador *j) {
         printf("%2d ", i + 1);
         for (int c = 0; c < TAM; c++) {
             char cel = j->tabuleiro[i][c];
-            printf("%c ", cel == 'O' ? '~' : cel);
+            printf("%c ", (cel == 'O') ? '~' : cel);
         }
         printf("\n");
     }
@@ -102,7 +104,6 @@ bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir) 
             for (int b = c - 1; b <= c + 1; b++) {
                 if (a < 0 || a >= TAM || b < 0 || b >= TAM)
                     continue;
-
                 if (player->tabuleiro[a][b] == 'O')
                     return true;
             }
@@ -172,7 +173,15 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome) {
 }
 
 void posicionarTodosNavios(Jogador *j) {
-    printf("\n--- POSICIONAMENTO DE %s ---\n", j->nome);
+    limparTela();
+
+    printf("=====================================\n");
+    printf("     POSICIONAMENTO DE NAVIOS\n");
+    printf("        Jogador: %s\n", j->nome);
+    printf("=====================================\n\n");
+
+    pausar(); // dá um tempo antes de começar
+
     posicionarNavio(j, 5, "Porta-Avioes");
     posicionarNavio(j, 4, "Navio-Tanque");
     posicionarNavio(j, 3, "Submarino");
@@ -184,7 +193,6 @@ void processarTurno(Jogador *atacante, Jogador *defensor) {
         limparTela();
         printf("\nVEZ DE: %s\n", atacante->nome);
 
-        printf("\nTabuleiro inimigo:\n");
         tabuleiroOculto(defensor);
 
         char letra;
@@ -228,6 +236,35 @@ void processarTurno(Jogador *atacante, Jogador *defensor) {
     }
 }
 
+void salvarJogo(Jogador *p1, Jogador *p2, int turno) {
+    SaveGame save = {*p1, *p2, turno};
+
+    FILE *arq = fopen("save.bin", "wb");
+    if (!arq) {
+        printf("Erro ao salvar jogo\n");
+        return;
+    }
+
+    fwrite(&save, sizeof(SaveGame), 1, arq);
+    fclose(arq);
+}
+
+bool carregarJogo(Jogador *p1, Jogador *p2, int *turno) {
+    FILE *arq = fopen("save.bin", "rb");
+    if (!arq)
+        return false;
+
+    SaveGame save;
+    fread(&save, sizeof(SaveGame), 1, arq);
+    fclose(arq);
+
+    *p1 = save.p1;
+    *p2 = save.p2;
+    *turno = save.turno;
+
+    return true;
+}
+
 void iniciarJogo() {
     limparTela();
     Jogador p1, p2;
@@ -248,6 +285,7 @@ void iniciarJogo() {
     p2.naviosRestantes = 14;
 
     int turno = 1;
+
     while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
         if (turno % 2)
             processarTurno(&p1, &p2);
@@ -256,57 +294,16 @@ void iniciarJogo() {
 
         turno++;
 
-        salvarJogo(&p1, &p2, &turno);
+        salvarJogo(&p1, &p2, turno);
     }
 
     limparTela();
     printf("\n===== FIM DE JOGO =====\n");
 
-    if (p1.naviosRestantes > 0)
-        printf("VENCEDOR: %s\n", p1.nome);
-    else
-        printf("VENCEDOR: %s\n", p2.nome);
+    printf("VENCEDOR: %s\n",
+           (p1.naviosRestantes > 0) ? p1.nome : p2.nome);
 
     pausar();
-}
-
-void salvarJogo(Jogador *p1, Jogador *p2, int turno){
-    SaveGame save;
-    save.p1 = *p1;
-    save.p2 = *p2;
-    save.turno = turno;
-
-    FILE *arq = fopen("save.bin", "wb");
-
-    if(arq == NULL){
-        printf("Erro ao salvar jogo");
-        return;
-    }
-
-    fwrite(&save, sizeof(SaveGame), 1, arq);
-    fclose(arq);
-
-    printf("Jogo salvo com sucesso");
-}
-
-bool carregarJogo(Jogador *p1, Jogador *p2, int *turno){
-    FILE *arq = fopen("save.bin", "rb");
-
-    if(arq == NULL){
-        printf("Nenhum jogo salvo encontrado!");
-        return false;
-    }
-
-    SaveGame save;
-    fread(&save, sizeof(SaveGame), 1, arq);
-    fclose(arq);
-
-    *p1 = save.p1;
-    *p2 = save.p2;
-    *turno = save.turno;
-
-    printf("Jogo carregado com sucesso");
-    return true;
 }
 
 void instrucoes() {
@@ -317,11 +314,7 @@ void instrucoes() {
     printf("3 - Ataques usando coordenadas (A5, D7...).\n");
     printf("4 - Vence quem destruir todos os navios.\n");
     printf("==========================\n");
-    printf("Pressione ENTER...\n");
-
-    limparBuffer();
-    getchar();
-
+    pausar();
     menu();
 }
 
@@ -331,45 +324,39 @@ void selecionar() {
     scanf("%d", &op);
 
     switch (op) {
-        case 1: {
-            iniciarJogo(); 
+        case 1:
+            iniciarJogo();
             break;
-        }
+
         case 2: {
             Jogador p1, p2;
             int turno;
 
-            if (carregarJogo(&p1, &p2, turno)){
-                while(p1.naviosRestantes > 0 && p2.naviosRestantes > 0){
-                    if(turno % 2){
+            if (carregarJogo(&p1, &p2, &turno)) {
+                while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
+                    if (turno % 2)
                         processarTurno(&p1, &p2);
-                    }else{
+                    else
                         processarTurno(&p2, &p1);
-                    }
+                    turno++;
                 }
-                turno++;
-                salvarJogo(&p1, &p2, &turno);
+            } else {
+                printf("Nenhum jogo salvo encontrado!\n");
+                pausar();
             }
-            limparTela();
-            printf("\n===== FIM DE JOGO =====\n");
-            if(p1.naviosRestantes > 0){
-                printf("VENCEDOR: %s\n", p1.nome);
-            }else{
-                printf("VENCEDOR: %s\n", p2.nome);
-            }
-            pausar();
             break;
         }
-        case 3: {
-            instrucoes(); 
+
+        case 3:
+            instrucoes();
             break;
-        }
-        case 4: {
+
+        case 4:
             exit(0);
-        }
-        default: {
+
+        default:
             printf("Opcao invalida!\n");
-        }
+            break;
     }
 }
 
