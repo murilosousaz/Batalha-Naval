@@ -134,7 +134,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome) {
         int col = letra - 'A';
         int row = linha - 1;
 
-        printf("Direcao (H/V): ");
+        printf("Direcao Horizontal ou Vertical (H/V): ");
         if (scanf(" %c", &dir) != 1) {
             limparBuffer();
             continue;
