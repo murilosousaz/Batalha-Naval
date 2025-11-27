@@ -9,6 +9,7 @@ typedef struct {
     char tabuleiro[TAM][TAM];
     int naviosRestantes;
 } Jogador;
+
 typedef struct {
     Jogador p1, p2;
     int turno;
@@ -31,7 +32,9 @@ bool areaOcupada(Jogador *player, int l, int c, int tam, char dir);
 void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
 void posicionarTodosNavios(Jogador *j);
 
-void processarTurno(Jogador *atacante, Jogador *defensor);
+// ===== CORREÇÃO AQUI =====
+void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *p2, int *turno);
+// =========================
 
 void salvarJogo(Jogador *p1, Jogador *p2, int turno);
 bool carregarJogo(Jogador *p1, Jogador *p2, int *turno);
@@ -180,7 +183,7 @@ void posicionarTodosNavios(Jogador *j) {
     printf("        Jogador: %s\n", j->nome);
     printf("=====================================\n\n");
 
-    pausar(); // dá um tempo antes de começar
+    pausar();
 
     posicionarNavio(j, 5, "Porta-Avioes");
     posicionarNavio(j, 4, "Navio-Tanque");
@@ -188,11 +191,12 @@ void posicionarTodosNavios(Jogador *j) {
     posicionarNavio(j, 2, "Bote");
 }
 
-void processarTurno(Jogador *atacante, Jogador *defensor) {
+void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *p2, int *turno){
     while (1) {
         limparTela();
         printf("\nVEZ DE: %s\n", atacante->nome);
 
+        printf("\n(Digite '0 0' para salvar e sair)\n");
         tabuleiroOculto(defensor);
 
         char letra;
@@ -202,6 +206,14 @@ void processarTurno(Jogador *atacante, Jogador *defensor) {
         if (scanf(" %c %d", &letra, &linha) != 2) {
             limparBuffer();
             continue;
+        }
+
+        if ((letra == '0') && (linha == 0)) {
+            printf("\nSalvando jogo...\n");
+            salvarJogo(p1, p2, *turno);
+            printf("Jogo salvo com sucesso!\n");
+            pausar();
+            exit(0);
         }
 
         letra = toupper(letra);
@@ -288,9 +300,9 @@ void iniciarJogo() {
 
     while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
         if (turno % 2)
-            processarTurno(&p1, &p2);
+            processarTurno(&p1, &p2, &p1, &p2, &turno);
         else
-            processarTurno(&p2, &p1);
+            processarTurno(&p2, &p1, &p1, &p2, &turno);
 
         turno++;
 
@@ -299,10 +311,7 @@ void iniciarJogo() {
 
     limparTela();
     printf("\n===== FIM DE JOGO =====\n");
-
-    printf("VENCEDOR: %s\n",
-           (p1.naviosRestantes > 0) ? p1.nome : p2.nome);
-
+    printf("VENCEDOR: %s\n", (p1.naviosRestantes > 0) ? p1.nome : p2.nome);
     pausar();
 }
 
@@ -335,9 +344,10 @@ void selecionar() {
             if (carregarJogo(&p1, &p2, &turno)) {
                 while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
                     if (turno % 2)
-                        processarTurno(&p1, &p2);
+                        processarTurno(&p1, &p2, &p1, &p2, &turno);
                     else
-                        processarTurno(&p2, &p1);
+                        processarTurno(&p2, &p1, &p1, &p2, &turno);
+
                     turno++;
                 }
             } else {
