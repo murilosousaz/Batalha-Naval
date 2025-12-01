@@ -1,0 +1,137 @@
+#include "batalha_naval.h"
+
+void inicializarTabuleiro(Jogador *j) {
+    for (int i = 0; i < TAM; i++)
+        for (int k = 0; k < TAM; k++)
+            j->tabuleiro[i][k] = '~';
+}
+
+void imprimirCabecalho() {
+    printf("\n   A B C D E F G H I J\n");
+}
+
+void tabuleiroCompleto(Jogador *j) {
+    imprimirCabecalho();
+    for (int i = 0; i < TAM; i++) {
+        printf("%2d ", i + 1);
+        for (int c = 0; c < TAM; c++)
+            printf("%c ", j->tabuleiro[i][c]);
+        printf("\n");
+    }
+}
+
+void tabuleiroOculto(Jogador *j) {
+    imprimirCabecalho();
+    for (int i = 0; i < TAM; i++) {
+        printf("%2d ", i + 1);
+        for (int c = 0; c < TAM; c++) {
+            char cel = j->tabuleiro[i][c];
+            printf("%c ", (cel == 'O') ? '~' : cel);
+        }
+        printf("\n");
+    }
+}
+
+bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir){
+    for (int k = 0; k < tamanho; k++) {
+        int r = linha + (dir == 'V' ? k : 0);
+        int c = coluna + (dir == 'H' ? k : 0);
+
+        for (int a = r - 1; a <= r + 1; a++) {
+            for (int b = c - 1; b <= c + 1; b++) {
+                if (a < 0 || a >= TAM || b < 0 || b >= TAM)
+                    continue;
+                if (player->tabuleiro[a][b] == 'O')
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+void posicionarNavio(Jogador *j, int tamanho, const char *nome){
+    char input_line[10];
+    
+    while (1) {
+        limparTela();
+        printf("\nPosicionar %s (%d celulas)\n", nome, tamanho);
+        tabuleiroCompleto(j);
+
+        char letra = '\0', dir = '\0';
+        int linha = 0;
+
+        printf("\nDigite a coordenada inicial e a direção (Ex: A 5 H): ");
+        
+        // 1. Usa fgets para ler a linha inteira, garantindo que o buffer seja limpo.
+        if (fgets(input_line, sizeof(input_line), stdin) == NULL) {
+            continue;
+        }
+
+        // 2. Remove o '\n' (nova linha) que fgets adiciona
+        input_line[strcspn(input_line, "\n")] = 0;
+
+        // 3. Tenta parsear a string lida
+        if (sscanf(input_line, " %c %d %c", &letra, &linha, &dir) != 3) {
+            printf("Entrada inválida! Use o formato 'Letra Numero Direcao' (Ex: A 5 H).\n");
+            pausar();
+            continue;
+        }
+
+        letra = toupper(letra);
+        dir = toupper(dir);
+        int col = letra - 'A';
+        int row = linha - 1;
+
+        if (row < 0 || row >= TAM || col < 0 || col >= TAM) {
+            printf("Coordenada inicial invalida!\n");
+            pausar();
+            continue;
+        }
+        if (dir != 'H' && dir != 'V') {
+             printf("Direção invalida! Use 'H' para Horizontal ou 'V' para Vertical.\n");
+            pausar();
+            continue;
+        }
+        if (dir == 'H' && col + tamanho > TAM) {
+            printf("Nao cabe horizontalmente!\n");
+            pausar();
+            continue;
+        }
+        if (dir == 'V' && row + tamanho > TAM) {
+            printf("Nao cabe verticalmente!\n");
+            pausar();
+            continue;
+        }
+        if (areaOcupada(j, row, col, tamanho, dir)) {
+            printf("Navio encostaria em outro!\n");
+            pausar();
+            continue;
+        }
+
+        for (int k = 0; k < tamanho; k++) {
+            int r = row + (dir == 'V' ? k : 0);
+            int c = col + (dir == 'H' ? k : 0);
+            j->tabuleiro[r][c] = 'O';
+        }
+
+        printf("%s posicionado!\n", nome);
+        pausar();
+        break;
+    }
+}
+
+void posicionarTodosNavios(Jogador *j){
+    limparTela();
+
+    printf("=====================================\n");
+    printf("     POSICIONAMENTO DE NAVIOS\n");
+    printf("        Jogador: %s\n", j->nome);
+    printf("=====================================\n\n");
+
+    pausar();
+
+    posicionarNavio(j, 5, "Porta-Avioes");
+    posicionarNavio(j, 4, "Navio-Tanque");
+    posicionarNavio(j, 3, "Submarino");
+    posicionarNavio(j, 2, "Bote");
+}
