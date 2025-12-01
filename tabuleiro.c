@@ -50,35 +50,25 @@ bool areaOcupada(Jogador *player, int linha, int coluna, int tamanho, char dir){
 }
 
 void posicionarNavio(Jogador *j, int tamanho, const char *nome){
-    char input_line[10];
-    
     while (1) {
         limparTela();
         printf("\nPosicionar %s (%d celulas)\n", nome, tamanho);
         tabuleiroCompleto(j);
 
-        char letra = '\0', dir = '\0';
-        int linha = 0;
+        char letra, dir;
+        int linha;
 
-        printf("\nDigite a coordenada inicial e a direção (Ex: A 5 H): ");
-        
-        // 1. Usa fgets para ler a linha inteira, garantindo que o buffer seja limpo.
-        if (fgets(input_line, sizeof(input_line), stdin) == NULL) {
-            continue;
-        }
-
-        // 2. Remove o '\n' (nova linha) que fgets adiciona
-        input_line[strcspn(input_line, "\n")] = 0;
-
-        // 3. Tenta parsear a string lida
-        if (sscanf(input_line, " %c %d %c", &letra, &linha, &dir) != 3) {
-            printf("Entrada inválida! Use o formato 'Letra Numero Direcao' (Ex: A 5 H).\n");
+        // --- Passo 1: Leitura da Coordenada (A 5) ---
+        printf("\nDigite a coordenada inicial (Ex: A 5): ");
+        if (scanf(" %c %d", &letra, &linha) != 2) { 
+            printf("Entrada inválida! Tente novamente.\n");
+            limparBuffer(); 
             pausar();
             continue;
         }
+        limparBuffer(); // CRUCIAL: Limpa o buffer após a leitura da coordenada
 
         letra = toupper(letra);
-        dir = toupper(dir);
         int col = letra - 'A';
         int row = linha - 1;
 
@@ -87,6 +77,19 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             pausar();
             continue;
         }
+
+        // --- Passo 2: Leitura da Direção (H/V) - O "BOTÃO" ---
+        printf("Selecione a direção do navio: Horizontal ou Vertical (H/V): ");
+        if (scanf(" %c", &dir) != 1) { 
+            printf("Entrada de direção inválida! Tente novamente.\n");
+            limparBuffer(); 
+            pausar();
+            continue;
+        }
+        limparBuffer(); // CRUCIAL: Limpa o buffer após a leitura da direção
+
+        dir = toupper(dir);
+        
         if (dir != 'H' && dir != 'V') {
              printf("Direção invalida! Use 'H' para Horizontal ou 'V' para Vertical.\n");
             pausar();
