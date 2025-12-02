@@ -93,7 +93,7 @@ void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *
             pausar();
             continue;
         }
-
+        
         if (*cel == 'O') {
             printf("\n*** ACERTOU! ***\n");
             *cel = 'X';
