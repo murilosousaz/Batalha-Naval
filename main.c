@@ -13,7 +13,7 @@ int main(){
       limparBuffer();
       op = 0;
     }
-    limparBuffer(); // Limpa o buffer após a leitura do número
+    limparBuffer();
 
     switch (op)
     {
@@ -29,7 +29,6 @@ int main(){
             printf("Jogo carregado com sucesso! Vez de: %s\n", (turno % 2) ? p1.nome : p2.nome);
             pausar();
 
-            // Loop principal do jogo carregado
             while (p1.naviosRestantes > 0 && p2.naviosRestantes > 0) {
                 if (turno % 2)
                     processarTurno(&p1, &p2, &p1, &p2, &turno);

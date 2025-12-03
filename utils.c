@@ -7,7 +7,6 @@ void limparBuffer(){
 
 void pausar(){
     printf("Pressione ENTER para continuar...");
-    // A chamada a limparBuffer() aqui garante que o ENTER anterior não seja lido imediatamente
     limparBuffer(); 
     getchar();
 }

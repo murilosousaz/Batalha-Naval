@@ -60,7 +60,6 @@ void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *
         }
         input_line[strcspn(input_line, "\n")] = 0;
 
-        // Implementação do "Botão" SAVE
         if (sscanf(input_line, "%s", entrada_temp) == 1 && strcmp(entrada_temp, "save") == 0) {
             printf("\nSalvando jogo...\n");
             salvarJogo(p1, p2, *turno);
@@ -69,7 +68,6 @@ void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *
             exit(0);
         }
 
-        // Tenta ler a coordenada 'Letra Número'
         if (sscanf(input_line, " %c %d", &letra, &linha) != 2) {
             printf("Entrada inválida! Use o formato 'A 5' ou digite 'save'.\n");
             pausar();

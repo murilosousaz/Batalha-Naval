@@ -7,7 +7,7 @@ void inicializarTabuleiro(Jogador *j) {
 }
 
 void imprimirCabecalho() {
-    printf("\n   A B C D E F G H I J\n");
+    printf("\n   A B C D E F G H I J \n");
 }
 
 void tabuleiroCompleto(Jogador *j) {
@@ -58,7 +58,6 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
         char letra, dir;
         int linha;
 
-        // --- Passo 1: Leitura da Coordenada (A 5) ---
         printf("\nDigite a coordenada inicial (Ex: A 5): ");
         if (scanf(" %c %d", &letra, &linha) != 2) { 
             printf("Entrada inválida! Tente novamente.\n");
@@ -66,7 +65,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             pausar();
             continue;
         }
-        limparBuffer(); // CRUCIAL: Limpa o buffer após a leitura da coordenada
+        limparBuffer();
 
         letra = toupper(letra);
         int col = letra - 'A';
@@ -78,7 +77,6 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             continue;
         }
 
-        // --- Passo 2: Leitura da Direção (H/V) - O "BOTÃO" ---
         printf("Selecione a direção do navio: Horizontal ou Vertical (H/V): ");
         if (scanf(" %c", &dir) != 1) { 
             printf("Entrada de direção inválida! Tente novamente.\n");
@@ -86,7 +84,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             pausar();
             continue;
         }
-        limparBuffer(); // CRUCIAL: Limpa o buffer após a leitura da direção
+        limparBuffer();
 
         dir = toupper(dir);
         
@@ -96,46 +94,31 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             continue;
         }
 
-        int reposicionado = 0; // Flag para indicar se o reposicionamento ocorreu
+        int reposicionado = 0;
         
-        // Reposicionamento Horizontal (Estouro à Direita)
         if (dir == 'H' && col + tamanho > TAM) {
-            // Se estoura, ajusta a coluna inicial para que o final do navio
-            // termine na última coluna (TAM - 1). Navio se estende para a esquerda.
             int col_nova = TAM - tamanho;
-            if (col_nova >= 0) { // Garante que o novo início não seja negativo
+            if (col_nova >= 0) {
                 col = col_nova;
                 reposicionado = 1;
                 printf("\n Reposicionando Horizontalmente: Navio movido para a Esquerda para caber!\n");
             }
         }
         
-        // Reposicionamento Vertical (Estouro Abaixo)
         if (dir == 'V' && row + tamanho > TAM) {
-            // Se estoura, ajusta a linha inicial para que o final do navio
-            // termine na última linha (TAM - 1). Navio se estende para cima.
             int row_nova = TAM - tamanho;
-            if (row_nova >= 0) { // Garante que o novo início não seja negativo
+            if (row_nova >= 0) {
                 row = row_nova;
                 reposicionado = 1;
                 printf("\n Reposicionando Verticalmente: Navio movido para Cima para caber!\n");
             }
         }
 
-        // Se o navio for reposicionado e a nova posição for inválida (TAM - tamanho < 0)
-        // ou se o tamanho for maior que o tabuleiro (tamanho > TAM, embora isso
-        // deva ser tratado antes), um erro mais robusto pode ser necessário.
-        // Assumindo que TAM >= tamanho e que o novo início é >= 0.
-
-        // Caso o reposicionamento ainda estoure (o que só aconteceria se TAM < tamanho,
-        // o que não deveria ocorrer se a validação inicial do navio estiver correta).
         if ((dir == 'H' && col + tamanho > TAM) || (dir == 'V' && row + tamanho > TAM)) {
             printf("Erro na lógica de reposicionamento ou navio muito grande para o tabuleiro!\n");
             pausar();
             continue;
         }        
-        // --- Passo 3: Verificação de Ocupação ---
-        // A verificação de ocupação é feita na *nova* posição (row/col)
         if (areaOcupada(j, row, col, tamanho, dir)) {
             printf("Navio encostaria em outro!\n");
             if (reposicionado) {
@@ -145,7 +128,6 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             continue;
         }
 
-        // --- Passo 4: Posicionamento Final ---
         for (int k = 0; k < tamanho; k++) {
             int r = row + (dir == 'V' ? k : 0);
             int c = col + (dir == 'H' ? k : 0);

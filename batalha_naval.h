@@ -12,7 +12,7 @@
 typedef struct {
     char nome[50];
     char tabuleiro[TAM][TAM];
-    int naviosRestantes; // Total de partes de navios não atingidas
+    int naviosRestantes;
 } Jogador;
 
 typedef struct {
@@ -20,13 +20,11 @@ typedef struct {
     int turno;
 } SaveGame;
 
-// Protótipos de Funções de Utilitários (utils.c)
 void menu();
 void limparTela();
 void limparBuffer();
 void pausar();
 
-// Protótipos de Funções de Tabuleiro (tabuleiro.c)
 void inicializarTabuleiro(Jogador *j);
 void imprimirCabecalho();
 void tabuleiroCompleto(Jogador *j);
@@ -35,7 +33,6 @@ bool areaOcupada(Jogador *player, int l, int c, int tam, char dir);
 void posicionarNavio(Jogador *j, int tamanho, const char *nomeNavio);
 void posicionarTodosNavios(Jogador *j);
 
-// Protótipos de Funções de Jogo (jogo.c)
 void iniciarJogo();
 void instrucoes();
 void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *p2, int *turno);
