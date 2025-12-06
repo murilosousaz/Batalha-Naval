@@ -60,7 +60,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
 
         printf("\nDigite a coordenada inicial (Ex: A 5): ");
         if (scanf(" %c %d", &letra, &linha) != 2) { 
-            printf("Entrada inválida! Tente novamente.\n");
+            printf("Entrada invalida! Tente novamente.\n");
             limparBuffer(); 
             pausar();
             continue;
@@ -77,9 +77,9 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
             continue;
         }
 
-        printf("Selecione a direção do navio: Horizontal ou Vertical (H/V): ");
+        printf("Selecione a direcao do navio: Horizontal ou Vertical (H/V): ");
         if (scanf(" %c", &dir) != 1) { 
-            printf("Entrada de direção inválida! Tente novamente.\n");
+            printf("Entrada de direcao invalida! Tente novamente.\n");
             limparBuffer(); 
             pausar();
             continue;
@@ -89,7 +89,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
         dir = toupper(dir);
         
         if (dir != 'H' && dir != 'V') {
-             printf("Direção invalida! Use 'H' para Horizontal ou 'V' para Vertical.\n");
+             printf("Direcao invalida! Use 'H' para Horizontal ou 'V' para Vertical.\n");
             pausar();
             continue;
         }
@@ -115,7 +115,7 @@ void posicionarNavio(Jogador *j, int tamanho, const char *nome){
         }
 
         if ((dir == 'H' && col + tamanho > TAM) || (dir == 'V' && row + tamanho > TAM)) {
-            printf("Erro na lógica de reposicionamento ou navio muito grande para o tabuleiro!\n");
+            printf("Erro na logica de reposicionamento ou navio muito grande para o tabuleiro!\n");
             pausar();
             continue;
         }        

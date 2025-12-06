@@ -69,7 +69,7 @@ void processarTurno(Jogador *atacante, Jogador *defensor, Jogador *p1, Jogador *
         }
 
         if (sscanf(input_line, " %c %d", &letra, &linha) != 2) {
-            printf("Entrada inválida! Use o formato 'A 5' ou digite 'save'.\n");
+            printf("Entrada invalida! Use o formato 'A 5' ou digite 'save'.\n");
             pausar();
             continue;
         }
